@@ -4,6 +4,7 @@ import ErrorPage from "../Pages/ErrorPage/ErrorPage";
 import Registration from "../Pages/Authentication/Register";
 import Login from "../Pages/Authentication/LogIn";
 import AboutUs from "../Pages/AboutUs/AboutUs";
+import SuccessStory from "../Pages/SuccessStory/SuccessStory";
 
 const Routes = createBrowserRouter([
     {
@@ -23,6 +24,10 @@ const Routes = createBrowserRouter([
                 {
                     path: '/about-us',
                     element: <AboutUs></AboutUs>,
+                },
+                {
+                    path: '/success-storys',
+                    element: <SuccessStory></SuccessStory>,
                 },
             ]
     }
