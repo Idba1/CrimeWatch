@@ -8,6 +8,7 @@ import SuccessStory from "../Pages/SuccessStory/SuccessStory";
 import Contact from "../Pages/ContactPage/Contact";
 import Home from "../Pages/Home/Home";
 import Blogs from "../Pages/Blogs/Blogs";
+import Chatbot from "../Pages/Chatbot/Chatbot";
 
 const Routes = createBrowserRouter([
     {
@@ -42,6 +43,10 @@ const Routes = createBrowserRouter([
             {
                 path: '/blogs',
                 element: <Blogs></Blogs>,
+            },
+            {
+                path: '/chatbot',
+                element: <Chatbot></Chatbot>,
             },
             ]
     }
