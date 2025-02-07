@@ -6,6 +6,7 @@ import Login from "../Pages/Authentication/LogIn";
 import AboutUs from "../Pages/AboutUs/AboutUs";
 import SuccessStory from "../Pages/SuccessStory/SuccessStory";
 import Contact from "../Pages/ContactPage/Contact";
+import Home from "../Pages/Home/Home";
 
 const Routes = createBrowserRouter([
     {
@@ -13,27 +14,30 @@ const Routes = createBrowserRouter([
         element: <Main></Main>,
         errorElement: <ErrorPage></ErrorPage>,
         children:
-            [
-                {
-                    path: '/registration',
-                    element: <Registration></Registration>,
-                },
-                {
-                    path: '/login',
-                    element: <Login></Login>,
-                },
-                {
-                    path: '/about-us',
-                    element: <AboutUs></AboutUs>,
-                },
-                {
-                    path: '/success-storys',
-                    element: <SuccessStory></SuccessStory>,
-                },
-                {
-                    path: '/contact-us',
-                    element: <Contact></Contact>,
-                },
+            [{
+                path: '/',
+                element: <Home></Home>,
+            },
+            {
+                path: '/registration',
+                element: <Registration></Registration>,
+            },
+            {
+                path: '/login',
+                element: <Login></Login>,
+            },
+            {
+                path: '/about-us',
+                element: <AboutUs></AboutUs>,
+            },
+            {
+                path: '/success-storys',
+                element: <SuccessStory></SuccessStory>,
+            },
+            {
+                path: '/contact-us',
+                element: <Contact></Contact>,
+            },
             ]
     }
 ]);
