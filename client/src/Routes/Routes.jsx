@@ -5,6 +5,7 @@ import Registration from "../Pages/Authentication/Register";
 import Login from "../Pages/Authentication/LogIn";
 import AboutUs from "../Pages/AboutUs/AboutUs";
 import SuccessStory from "../Pages/SuccessStory/SuccessStory";
+import Contact from "../Pages/ContactPage/Contact";
 
 const Routes = createBrowserRouter([
     {
@@ -28,6 +29,10 @@ const Routes = createBrowserRouter([
                 {
                     path: '/success-storys',
                     element: <SuccessStory></SuccessStory>,
+                },
+                {
+                    path: '/contact-us',
+                    element: <Contact></Contact>,
                 },
             ]
     }
