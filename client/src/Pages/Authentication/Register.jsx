@@ -1,11 +1,21 @@
-import { useContext } from "react"
+import { useContext, useEffect } from "react"
 import toast from "react-hot-toast"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { AuthContext } from "../../Provider/AuthProvider"
+import axios from "axios"
 
 const Registration = () => {
   const navigate = useNavigate()
-  const { signInWithGoogle, createUser, updateUserProfile, user, setUser } = useContext(AuthContext)
+  const { signInWithGoogle, createUser, updateUserProfile, user, setUser, loading } = useContext(AuthContext)
+
+  const location = useLocation()
+  const from = location.state || '/'
+
+  useEffect(() => {
+    if (user) {
+      navigate('/')
+    }
+  }, [navigate, user])
 
   const handleSignUp = async e => {
     e.preventDefault()
@@ -19,10 +29,19 @@ const Registration = () => {
 
       //User Registration
       const result = await createUser(email, pass)
-      console.log(result)
+      // console.log(result)
       await updateUserProfile(name, photo)
-      setUser({ ...user, photoURL: photo, displayName: name })
-      navigate('/')
+      setUser({ ...result?.user, photoURL: photo, displayName: name })
+
+      // console.log(result.user);
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/jwt`,
+        { email: result?.user?.email },
+        { withCredentials: true }
+      );
+
+      console.log(data);
+      navigate(from, { replace: true })
       toast.success('Signup Successful')
     } catch (err) {
       console.log(err)
@@ -33,14 +52,24 @@ const Registration = () => {
   // Google 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle()
+      const result = await signInWithGoogle()
+      console.log(result.user);
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/jwt`,
+        { email: result?.user?.email },
+        { withCredentials: true }
+      );
+
+      console.log(data);
       toast.success('Signin Successful')
-      navigate('/')
+      navigate(from, { replace: true })
     } catch (err) {
       console.log(err)
       toast.error(err?.message)
     }
   }
+  if (user || loading) return
+
   return (
     <div className='flex justify-center items-center my-12 min-h-[calc(100vh-306px)]'>
       <div className='flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg  lg:max-w-4xl '>
