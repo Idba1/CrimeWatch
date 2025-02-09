@@ -3,22 +3,25 @@ import Main from "../Layout/Main";
 import ErrorPage from "../Pages/ErrorPage/ErrorPage";
 import Registration from "../Pages/Authentication/Register";
 import Login from "../Pages/Authentication/LogIn";
-import AboutUs from "../Pages/AboutUs/AboutUs";
-import SuccessStory from "../Pages/SuccessStory/SuccessStory";
-import Contact from "../Pages/ContactPage/Contact";
 import Home from "../Pages/Home/Home";
-import Blogs from "../Pages/Blogs/Blogs";
-import Chatbot from "../Pages/Chatbot/Chatbot";
 import Dashboard from "../Pages/Dashboard/Dashboard";
 import PrivateRoute from "./PrivateRoute";
+import CrimeFeed from "../Components/CrimeFeed";
+import ReportCrime from "../Components/ReportCrime";
+import MyReports from "../Components/MyReports";
+import Community from "../Components/Community";
+import Leaderboard from "../Components/Leaderboard";
+import AdminPanel from "../Components/AdminPanel";
+import Profile from "../Components/Profile";
+
 
 const Routes = createBrowserRouter([
     {
         path: '/',
         element: <Main></Main>,
         errorElement: <ErrorPage></ErrorPage>,
-        children:
-            [{
+        children: [
+            {
                 path: '/',
                 element: <Home></Home>,
             },
@@ -31,34 +34,49 @@ const Routes = createBrowserRouter([
                 element: <Login></Login>,
             },
             {
-                path: '/about-us',
-                element: <AboutUs></AboutUs>,
+                path: '/crime-feed',
+                element: <CrimeFeed></CrimeFeed>,
             },
             {
-                path: '/success-storys',
-                element: <SuccessStory></SuccessStory>,
-            },
-            {
-                path: '/contact-us',
-                element: <Contact></Contact>,
-            },
-            {
-                path: '/blogs',
-                element: <Blogs></Blogs>,
-            },
-            {
-                path: '/chatbot',
+                path: '/report',
                 element: <PrivateRoute>
-                    <Chatbot></Chatbot>
+                    <ReportCrime></ReportCrime>
+                </PrivateRoute>,
+            },
+            {
+                path: '/my-reports',
+                element: <PrivateRoute>
+                    <MyReports></MyReports>
+                </PrivateRoute>,
+            },
+            {
+                path: '/community',
+                element: <PrivateRoute>
+                    <Community></Community>
+                </PrivateRoute>,
+            },
+            {
+                path: '/leaderboard',
+                element: <Leaderboard></Leaderboard>,
+            },
+            {
+                path: '/admin',
+                element: <PrivateRoute>
+                    <AdminPanel></AdminPanel>
+                </PrivateRoute>,
+            },
+            {
+                path: '/profile',
+                element: <PrivateRoute>
+                    <Profile></Profile>
                 </PrivateRoute>,
             },
             {
                 path: '/dashboard',
                 element: <Dashboard></Dashboard>,
             },
-            ]
+        ]
     }
 ]);
-
 
 export default Routes;
