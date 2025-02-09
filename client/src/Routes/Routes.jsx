@@ -10,6 +10,7 @@ import Home from "../Pages/Home/Home";
 import Blogs from "../Pages/Blogs/Blogs";
 import Chatbot from "../Pages/Chatbot/Chatbot";
 import Dashboard from "../Pages/Dashboard/Dashboard";
+import PrivateRoute from "./PrivateRoute";
 
 const Routes = createBrowserRouter([
     {
@@ -47,7 +48,9 @@ const Routes = createBrowserRouter([
             },
             {
                 path: '/chatbot',
-                element: <Chatbot></Chatbot>,
+                element: <PrivateRoute>
+                    <Chatbot></Chatbot>
+                </PrivateRoute>,
             },
             {
                 path: '/dashboard',
