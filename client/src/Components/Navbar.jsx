@@ -30,6 +30,7 @@ const Navbar = () => {
                 )}
                 <Link to="/my-reports" className="hover:text-blue-600">My Reports</Link>
                 <Link to="/community" className="hover:text-blue-600">Community</Link>
+                <Link to="/about-us" className="hover:text-blue-600">About</Link>
                 <Link to="/leaderboard" className="hover:text-blue-600">Leaderboard</Link>
                 {isAdmin && <Link to="/admin" className="text-red-600 font-semibold">Admin Panel</Link>}
             </div>
@@ -49,6 +50,7 @@ const Navbar = () => {
                         {isVerified && <Link to="/report" onClick={toggleMenu}>Report Crime</Link>}
                         <Link to="/my-reports" onClick={toggleMenu}>My Reports</Link>
                         <Link to="/community" onClick={toggleMenu}>Community</Link>
+                        <Link to="/about-us" onClick={toggleMenu}>About</Link>
                         <Link to="/leaderboard" onClick={toggleMenu}>Leaderboard</Link>
                         {isAdmin && <Link to="/admin" onClick={toggleMenu}>Admin Panel</Link>}
                     </ul>

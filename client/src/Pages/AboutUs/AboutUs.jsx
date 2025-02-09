@@ -21,7 +21,7 @@ const AboutUs = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="p-6 rounded shadow-md dark:bg-gray-50">
+                                    {/* <div className="p-6 rounded shadow-md dark:bg-gray-50">
                                         <p>Sit wisi sapientem ut, pri civibus temporibus voluptatibus et, ius cu hinc fabulas. Nam meliore minimum et, regione convenire cum id. Ex pro eros mucius consectetuer, pro magna nulla nonumy ne, eam putent iudicabit consulatu cu.</p>
                                         <div className="flex items-center mt-4 space-x-4">
                                             <img src="https://source.unsplash.com/50x50/?portrait?2" alt="" className="w-12 h-12 bg-center bg-cover rounded-full dark:bg-gray-500" />
@@ -30,7 +30,7 @@ const AboutUs = () => {
                                                 <p className="text-sm dark:text-gray-600">CTO of Company Co.</p>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> */}
                                 </div>
                                 <div className="grid content-center gap-4">
                                     <div className="p-6 rounded shadow-md dark:bg-gray-50">

@@ -12,6 +12,7 @@ import Community from "../Components/Community";
 import Leaderboard from "../Components/Leaderboard";
 import AdminPanel from "../Components/AdminPanel";
 import Profile from "../Components/Profile";
+import AboutUs from "../Pages/AboutUs/AboutUs";
 
 
 const Routes = createBrowserRouter([
@@ -57,6 +58,10 @@ const Routes = createBrowserRouter([
             {
                 path: '/leaderboard',
                 element: <Leaderboard></Leaderboard>,
+            },
+            {
+                path: '/about-us',
+                element: <AboutUs></AboutUs>,
             },
             {
                 path: '/admin',
