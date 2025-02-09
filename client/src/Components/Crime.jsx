@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-const Courses = () => {
+const Crime = () => {
     const stories = [
         {
             "id": 1,
@@ -117,4 +117,4 @@ const Courses = () => {
     );
 };
 
-export default Courses;
+export default Crime;

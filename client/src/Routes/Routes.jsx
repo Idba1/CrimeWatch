@@ -4,7 +4,6 @@ import ErrorPage from "../Pages/ErrorPage/ErrorPage";
 import Registration from "../Pages/Authentication/Register";
 import Login from "../Pages/Authentication/LogIn";
 import Home from "../Pages/Home/Home";
-import Dashboard from "../Pages/Dashboard/Dashboard";
 import PrivateRoute from "./PrivateRoute";
 import CrimeFeed from "../Components/CrimeFeed";
 import ReportCrime from "../Components/ReportCrime";
@@ -71,10 +70,7 @@ const Routes = createBrowserRouter([
                     <Profile></Profile>
                 </PrivateRoute>,
             },
-            {
-                path: '/dashboard',
-                element: <Dashboard></Dashboard>,
-            },
+            
         ]
     }
 ]);

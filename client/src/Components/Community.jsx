@@ -23,7 +23,7 @@ const Community = () => {
   return (
     <div className="bg-gray-900 text-white py-12 px-4">
       <div className="container mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-6">Meet Our Team</h1>
+        <h1 className="text-3xl font-bold text-center mb-6">Meet Our Community</h1>
         <p className="text-center text-gray-400 mb-10">
           Discover the amazing individuals who make our community great.
         </p>
