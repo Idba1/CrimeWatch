@@ -88,14 +88,14 @@ const Login = () => {
                         Login
                     </button>
                 </form>
-                <div className="mt-4 text-center">
+                {/* <div className="mt-4 text-center">
                     <button
                         onClick={handleGoogleSignIn}
                         className="w-full py-2 border rounded-lg flex justify-center items-center gap-2 hover:bg-gray-100"
                     >
                         Sign in with Google
                     </button>
-                </div>
+                </div> */}
                 <p className="mt-4 text-sm text-center text-gray-600">
                     Don't have an account?{' '}
                     <Link to="/registration" className="text-blue-500 hover:underline">
