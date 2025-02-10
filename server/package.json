@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "expree": "^2.1.0",
+    "gitignore": "^0.7.0",
+    "mongodb": "^6.13.0"
+  }
+}
