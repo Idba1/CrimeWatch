@@ -13,8 +13,8 @@ import Leaderboard from "../Components/Leaderboard";
 import Profile from "../Components/Profile";
 import AboutUs from "../Pages/AboutUs/AboutUs";
 import ForgetPassword from "../Pages/Authentication/ForgetPassword";
-import AdminDashboard from "../Pages/AdminDashboard/AdminDashboard";
-import Admin2 from "../Pages/Admin2/Admin2";
+import Admin from "../Pages/Admin/Admin";
+import Dashboard from "../Layout/dashboard";
 
 
 const Routes = createBrowserRouter([
@@ -63,7 +63,11 @@ const Routes = createBrowserRouter([
             },
             {
                 path: '/admin',
-                element: <Admin2></Admin2>,
+                element: <Admin></Admin>,
+            },
+            {
+                path: '/dashboard',
+                element: <Dashboard></Dashboard>,
             },
             {
                 path: '/about-us',
