@@ -14,6 +14,8 @@ import Profile from "../Components/Profile";
 import AboutUs from "../Pages/AboutUs/AboutUs";
 import ForgetPassword from "../Pages/Authentication/ForgetPassword";
 import ConditionalDashboard from "../Dashboard/ConditionalDashboard/ConditionalDashboard";
+import AdminDashboard from "../Dashboard/AdminDashboard/AdminDashboard";
+import Chatbot from "../Pages/Chatbot/Chatbot";
 
 const Routes = createBrowserRouter([
     {
@@ -36,6 +38,10 @@ const Routes = createBrowserRouter([
             {
                 path: '/crime-feed',
                 element: <CrimeFeed />,
+            },
+            {
+                path: '/chat-bot',
+                element: <Chatbot />,
             },
             {
                 path: '/report',
@@ -70,10 +76,18 @@ const Routes = createBrowserRouter([
                 element: <AboutUs />,
             },
             {
-                path: "/dashboard",
+                path: "/dashboard2",
                 element: (
                     <PrivateRoute>
                         <ConditionalDashboard />
+                    </PrivateRoute>
+                ),
+            },
+            {
+                path: "/dashboard",
+                element: (
+                    <PrivateRoute>
+                        <AdminDashboard />
                     </PrivateRoute>
                 ),
             },
