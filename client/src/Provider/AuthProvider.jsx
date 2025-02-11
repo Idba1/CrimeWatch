@@ -9,7 +9,7 @@ import {
     signOut,
     updateProfile
 } from 'firebase/auth';
-import { app } from '../firebase/firebase.config'; // Make sure you have set up firebase.config.js
+import { app } from '../firebase/firebase.config';
 
 export const AuthContext = createContext(null);
 const auth = getAuth(app);
@@ -18,7 +18,7 @@ const googleProvider = new GoogleAuthProvider();
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    // Store the user role (e.g., 'admin' or null/other)
+    // The user role (e.g., "admin" if the custom claim is set, or null/other for verified users)
     const [role, setRole] = useState(null);
 
     const createUser = (email, password) => {
@@ -56,7 +56,7 @@ const AuthProvider = ({ children }) => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
-                // Assuming you have set a custom claim "role" in your Firebase token
+                // Retrieve the ID token result to access custom claims
                 const token = await currentUser.getIdTokenResult();
                 setRole(token.claims.role);
             }

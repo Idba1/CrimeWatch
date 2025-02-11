@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 
 const Login = () => {
-    const { signIn, signInWithGoogle, user, loading } = useContext(AuthContext);
+    const { signIn, user, loading } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from?.pathname || '/';
@@ -15,21 +15,6 @@ const Login = () => {
             navigate(from, { replace: true });
         }
     }, [user, from, navigate]);
-
-    const handleGoogleSignIn = async () => {
-        try {
-            const result = await signInWithGoogle();
-            const { data } = await axios.post(
-                `${import.meta.env.VITE_API_URL}/jwt`,
-                { email: result.user.email },
-                { withCredentials: true }
-            );
-            toast.success('Sign in successful!');
-            navigate(from, { replace: true });
-        } catch (error) {
-            toast.error(error.message);
-        }
-    };
 
     const handleSignInEmailPass = async (e) => {
         e.preventDefault();
@@ -41,8 +26,9 @@ const Login = () => {
             const { data } = await axios.post(
                 `${import.meta.env.VITE_API_URL}/jwt`,
                 { email: result.user.email },
-                { withCredentials: true }
+                { withCredentials: true },
             );
+            console.log(data);
             toast.success('Login successful!');
             navigate(from, { replace: true });
         } catch (err) {
