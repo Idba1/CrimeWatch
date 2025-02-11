@@ -14,6 +14,7 @@ import Profile from "../Components/Profile";
 import AboutUs from "../Pages/AboutUs/AboutUs";
 import ForgetPassword from "../Pages/Authentication/ForgetPassword";
 import AdminDashboard from "../Dashboard/AdminDashboard/AdminDashboard";
+import VerifiedDashboard from "../Dashboard/AuthorizedUserDashboard/VerifiedDashboard";
 
 
 const Routes = createBrowserRouter([
@@ -68,6 +69,12 @@ const Routes = createBrowserRouter([
                 path: '/admin-dashboard',
                 element: <PrivateRoute>
                     <AdminDashboard/>
+                </PrivateRoute>,
+            },
+            {
+                path: '/user-dashboard',
+                element: <PrivateRoute>
+                    <VerifiedDashboard/>
                 </PrivateRoute>,
             },
             {
