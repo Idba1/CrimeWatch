@@ -16,6 +16,7 @@ import ForgetPassword from "../Pages/Authentication/ForgetPassword";
 import ConditionalDashboard from "../Dashboard/ConditionalDashboard/ConditionalDashboard";
 import AdminDashboard from "../Dashboard/AdminDashboard/AdminDashboard";
 import Chatbot from "../Pages/Chatbot/Chatbot";
+import Contact from "../Pages/ContactPage/Contact";
 
 const Routes = createBrowserRouter([
     {
@@ -106,6 +107,10 @@ const Routes = createBrowserRouter([
                         <ForgetPassword />
                     </PrivateRoute>
                 ),
+            },
+            {
+                path: '/contact',
+                element: <Contact />,
             },
         ],
     },
