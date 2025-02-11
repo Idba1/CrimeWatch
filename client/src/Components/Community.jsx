@@ -8,8 +8,8 @@ const Community = () => {
   useEffect(() => {
     const fetchTeamMembers = async () => {
       try {
-        const response = await axios.get("https://randomuser.me/api/?results=8&nat=us");
-        setTeamMembers(response.data.results);
+        const response = await axios.get("http://localhost:9000/users");
+        setTeamMembers(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching team members:", error);
@@ -37,30 +37,12 @@ const Community = () => {
                 className="bg-gray-800 rounded-lg shadow-lg p-4 flex flex-col items-center text-center"
               >
                 <img
-                  src={member.picture.large}
-                  alt={member.name.first}
+                  src={member.photo}
+                  alt={member.name}
                   className="w-24 h-24 rounded-full mb-4 border-4 border-gray-700"
                 />
-                <h2 className="text-lg font-semibold">{`${member.name.first} ${member.name.last}`}</h2>
+                <h2 className="text-lg font-semibold">{member.name}</h2>
                 <p className="text-sm text-gray-400">{member.email}</p>
-                <div className="flex space-x-4 mt-3">
-                  <a
-                    href={`https://twitter.com/${member.login.username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300"
-                  >
-                    <i className="fab fa-twitter"></i>
-                  </a>
-                  <a
-                    href={`https://linkedin.com/in/${member.login.username}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-500"
-                  >
-                    <i className="fab fa-linkedin"></i>
-                  </a>
-                </div>
               </div>
             ))}
           </div>

@@ -13,6 +13,7 @@ import Leaderboard from "../Components/Leaderboard";
 import AdminPanel from "../Components/AdminPanel";
 import Profile from "../Components/Profile";
 import AboutUs from "../Pages/AboutUs/AboutUs";
+import ForgetPassword from "../Pages/Authentication/ForgetPassword";
 
 
 const Routes = createBrowserRouter([
@@ -73,6 +74,12 @@ const Routes = createBrowserRouter([
                 path: '/profile',
                 element: <PrivateRoute>
                     <Profile></Profile>
+                </PrivateRoute>,
+            },
+            {
+                path: '/forget-password',
+                element: <PrivateRoute>
+                    <ForgetPassword></ForgetPassword>
                 </PrivateRoute>,
             },
             
