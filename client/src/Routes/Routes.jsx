@@ -10,10 +10,11 @@ import ReportCrime from "../Components/ReportCrime";
 import MyReports from "../Components/MyReports";
 import Community from "../Components/Community";
 import Leaderboard from "../Components/Leaderboard";
-import AdminPanel from "../Components/AdminPanel";
 import Profile from "../Components/Profile";
 import AboutUs from "../Pages/AboutUs/AboutUs";
 import ForgetPassword from "../Pages/Authentication/ForgetPassword";
+import AdminDashboard from "../Pages/AdminDashboard/AdminDashboard";
+import Admin2 from "../Pages/Admin2/Admin2";
 
 
 const Routes = createBrowserRouter([
@@ -61,15 +62,19 @@ const Routes = createBrowserRouter([
                 element: <Leaderboard></Leaderboard>,
             },
             {
+                path: '/admin',
+                element: <Admin2></Admin2>,
+            },
+            {
                 path: '/about-us',
                 element: <AboutUs></AboutUs>,
             },
-            {
-                path: '/admin',
-                element: <PrivateRoute>
-                    <AdminPanel></AdminPanel>
-                </PrivateRoute>,
-            },
+            // {
+            //     path: '/admin',
+            //     element: <PrivateRoute>
+            //         <AdminDashboard/>
+            //     </PrivateRoute>,
+            // },
             {
                 path: '/profile',
                 element: <PrivateRoute>
