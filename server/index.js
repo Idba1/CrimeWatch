@@ -3,6 +3,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT || 9000;
+const nodemailer = require('nodemailer');
 
 const app = express();
 const corsOptions = {
@@ -103,6 +104,89 @@ async function run() {
                 res.status(500).send({ message: 'Error deleting user', error: err.message });
             }
         });
+
+        const nodemailer = require('nodemailer');
+
+        async function sendPasswordRecoveryEmail(email, resetLink) {
+            const transporter = nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    user: "crimewatch596@gmail.com",
+                    pass: "crimewatch09+?",
+                },
+            });
+
+            const mailOptions = {
+                from: "crimewatch596@gmail.com",
+                to: email, // Changed to dynamic email
+                subject: 'Password Recovery',
+                html: `<p>Please click the following link to reset your password:</p><a href="${resetLink}">${resetLink}</a>`,
+            };
+
+            try {
+                await transporter.sendMail(mailOptions);
+                console.log('Password recovery email sent successfully to', email);
+            } catch (error) {
+                console.error('Error sending password recovery email:', error);
+            }
+        }
+
+
+        app.post('/request-password-recovery', async (req, res) => {
+            const { email } = req.body;
+            if (!email) {
+                return res.status(400).json({ message: "Email is required" });
+            }
+
+            try {
+                const user = await userCollection.findOne({ email });
+                if (!user) {
+                    return res.status(404).json({ message: "User not found" });
+                }
+
+                const token = crypto.randomBytes(32).toString('hex');
+                const expireTime = new Date(Date.now() + 3600000); // Token expires in 1 hour
+
+                await userCollection.updateOne({ email }, { $set: { resetToken: token, resetTokenExpire: expireTime } });
+
+                const resetLink = `http://localhost:3000/reset-password?token=${token}&email=${email}`;
+
+                // Send email with reset link (using an email service like SendGrid or NodeMailer)
+                await sendPasswordRecoveryEmail(email, resetLink);
+
+                res.status(200).json({ message: "Password recovery email sent" });
+            } catch (err) {
+                console.error("Error sending password recovery email:", err);
+                res.status(500).json({ message: "Error sending password recovery email", error: err.message });
+            }
+        });
+
+
+        async function testEmail() {
+            const transporter = nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    user: "crimewatch596@gmail.com",
+                    pass: "crimewatch09+?",
+                },
+            });
+
+            const mailOptions = {
+                from: "crimewatch596@gmail.com",
+                to: "moniraislam181@gmail.com",
+                subject: 'Test Email',
+                html: `<p>This is a test email.</p>`,
+            };
+
+            try {
+                await transporter.sendMail(mailOptions);
+                console.log('Test email sent successfully');
+            } catch (error) {
+                console.error('Error sending test email:', error);
+            }
+        }
+
+        testEmail();
 
         // Ping the MongoDB server
         await client.db('admin').command({ ping: 1 });
