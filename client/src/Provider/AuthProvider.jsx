@@ -7,9 +7,9 @@ import {
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut,
-    updateProfile,
+    updateProfile
 } from 'firebase/auth';
-import { app } from '../firebase/firebase.config';
+import { app } from '../firebase/firebase.config'; // Make sure you have set up firebase.config.js
 
 export const AuthContext = createContext(null);
 const auth = getAuth(app);
@@ -18,6 +18,8 @@ const googleProvider = new GoogleAuthProvider();
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    // Store the user role (e.g., 'admin' or null/other)
+    const [role, setRole] = useState(null);
 
     const createUser = (email, password) => {
         setLoading(true);
@@ -34,11 +36,11 @@ const AuthProvider = ({ children }) => {
         return signInWithPopup(auth, googleProvider);
     };
 
-    // Logout
     const logOut = () => {
         setLoading(true);
         return signOut(auth).then(() => {
             setUser(null);
+            setRole(null);
             setLoading(false);
         });
     };
@@ -51,8 +53,13 @@ const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
+            if (currentUser) {
+                // Assuming you have set a custom claim "role" in your Firebase token
+                const token = await currentUser.getIdTokenResult();
+                setRole(token.claims.role);
+            }
             setLoading(false);
         });
         return () => unsubscribe();
@@ -60,7 +67,7 @@ const AuthProvider = ({ children }) => {
 
     const authInfo = {
         user,
-        setUser,
+        role,
         loading,
         createUser,
         signIn,
@@ -70,7 +77,9 @@ const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={authInfo}>
+            {children}
+        </AuthContext.Provider>
     );
 };
 

@@ -13,85 +13,88 @@ import Leaderboard from "../Components/Leaderboard";
 import Profile from "../Components/Profile";
 import AboutUs from "../Pages/AboutUs/AboutUs";
 import ForgetPassword from "../Pages/Authentication/ForgetPassword";
-import AdminDashboard from "../Dashboard/AdminDashboard/AdminDashboard";
-import VerifiedDashboard from "../Dashboard/AuthorizedUserDashboard/VerifiedDashboard";
-
+import ConditionalDashboard from "../Dashboard/ConditionalDashboard/ConditionalDashboard";
 
 const Routes = createBrowserRouter([
     {
         path: '/',
-        element: <Main></Main>,
-        errorElement: <ErrorPage></ErrorPage>,
+        element: <Main />,
+        errorElement: <ErrorPage />,
         children: [
             {
                 path: '/',
-                element: <Home></Home>,
+                element: <Home />,
             },
             {
                 path: '/registration',
-                element: <Registration></Registration>,
+                element: <Registration />,
             },
             {
                 path: '/login',
-                element: <Login></Login>,
+                element: <Login />,
             },
             {
                 path: '/crime-feed',
-                element: <CrimeFeed></CrimeFeed>,
+                element: <CrimeFeed />,
             },
             {
                 path: '/report',
-                element: <PrivateRoute>
-                    <ReportCrime></ReportCrime>
-                </PrivateRoute>,
+                element: (
+                    <PrivateRoute>
+                        <ReportCrime />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: '/my-reports',
-                element: <PrivateRoute>
-                    <MyReports></MyReports>
-                </PrivateRoute>,
+                element: (
+                    <PrivateRoute>
+                        <MyReports />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: '/community',
-                element: <PrivateRoute>
-                    <Community></Community>
-                </PrivateRoute>,
+                element: (
+                    <PrivateRoute>
+                        <Community />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: '/leaderboard',
-                element: <Leaderboard></Leaderboard>,
+                element: <Leaderboard />,
             },
             {
                 path: '/about-us',
-                element: <AboutUs></AboutUs>,
+                element: <AboutUs />,
             },
             {
-                path: '/admin-dashboard',
-                element: <PrivateRoute>
-                    <AdminDashboard/>
-                </PrivateRoute>,
-            },
-            {
-                path: '/user-dashboard',
-                element: <PrivateRoute>
-                    <VerifiedDashboard/>
-                </PrivateRoute>,
+                path: "/dashboard",
+                element: (
+                    <PrivateRoute>
+                        <ConditionalDashboard />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: '/profile',
-                element: <PrivateRoute>
-                    <Profile></Profile>
-                </PrivateRoute>,
+                element: (
+                    <PrivateRoute>
+                        <Profile />
+                    </PrivateRoute>
+                ),
             },
             {
                 path: '/forget-password',
-                element: <PrivateRoute>
-                    <ForgetPassword></ForgetPassword>
-                </PrivateRoute>,
+                element: (
+                    <PrivateRoute>
+                        <ForgetPassword />
+                    </PrivateRoute>
+                ),
             },
-            
-        ]
-    }
+        ],
+    },
 ]);
 
 export default Routes;

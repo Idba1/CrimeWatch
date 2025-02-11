@@ -1,31 +1,27 @@
-import CrimeFeedDashboard from "./CrimeFeedDashboard";
-import VerifiedSidebar from "./VerifiedSidebar";
+import { FaHome, FaClipboardList, FaUser } from 'react-icons/fa';
 
-
-const VerifiedDashboard = () => {
+const VerifiedSidebar = () => {
     return (
-        <div className="flex bg-gray-100 min-h-screen">
-            {/* Sidebar */}
-            <VerifiedSidebar />
-
-            {/* Main content */}
-            <div className="flex-1 p-6">
-                <header className="flex flex-col md:flex-row md:justify-between items-start md:items-center mb-6">
-                    <h1 className="text-2xl font-bold">Verified User Dashboard</h1>
-                    <button
-                        className="mt-4 md:mt-0 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
-                        // Replace the onClick handler with routing or modal logic as needed.
-                        onClick={() => alert("Redirect to Report Crime page")}
-                    >
-                        Report Crime
-                    </button>
-                </header>
-
-                {/* Crime Feed Section */}
-                <CrimeFeedDashboard />
+        <div className="w-64 bg-white shadow-md h-screen">
+            <div className="p-6">
+                <h2 className="text-2xl font-bold">Crime Verify</h2>
             </div>
+            <nav className="mt-10">
+                <a href="#" className="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                    <FaHome className="mr-3" />
+                    Dashboard
+                </a>
+                <a href="#" className="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                    <FaClipboardList className="mr-3" />
+                    My Reports
+                </a>
+                <a href="#" className="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                    <FaUser className="mr-3" />
+                    Profile
+                </a>
+            </nav>
         </div>
     );
 };
 
-export default VerifiedDashboard;
+export default VerifiedSidebar;
