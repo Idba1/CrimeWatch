@@ -12,7 +12,7 @@ const Footer = () => {
                             className="h-14 w-16 object-contain"
                         />
                         <span className="text-2xl font-semibold text-[#FF8C00] transition-all duration-300 hover:scale-105">
-                            RiseWithYou
+                            CrimeWatch
                         </span>
                     </a>
                 </div>
@@ -159,7 +159,7 @@ const Footer = () => {
             </div>
             {/* Copyright */}
             <div className="py-6 text-sm text-center">
-                © 2025 RiseWithYou. All rights reserved.
+                © 2025 CrimeWatch. All rights reserved.
             </div>
         </footer>
     );
