@@ -112,7 +112,9 @@ const Routes = createBrowserRouter([
             {
                 path: '/post-crime',
                 element: (
+                    <PrivateRoute>
                         <PostCrime></PostCrime>
+                    </PrivateRoute>
                 ),
             },
             {

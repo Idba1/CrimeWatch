@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
+import { AuthContext } from "../Provider/AuthProvider";
 
 const MyReports = () => {
+    const { user } = useContext(AuthContext);
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -9,19 +11,28 @@ const MyReports = () => {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                // Replace this URL with an actual API endpoint for reports
-                const response = await axios.get("https://jsonplaceholder.typicode.com/posts");
-                setReports(response.data);
+                if (!user || !user.email) {
+                    setError("User not logged in");
+                    setLoading(false);
+                    return;
+                }
+                // Update the URL to your backend endpoint that filters by userEmail
+                const response = await axios.get(`http://localhost:9000/crimePosts`, {
+                    params: { userEmail: user.email }
+                });
+                // If the response returns an object with a "posts" property (for pagination), extract it.
+                const data = response.data.posts ? response.data.posts : response.data;
+                setReports(data);
                 setLoading(false);
             } catch (err) {
-                console.log(err);
+                console.error(err);
                 setError("Failed to load reports.");
                 setLoading(false);
             }
         };
 
         fetchReports();
-    }, []);
+    }, [user]);
 
     return (
         <div className="container mx-auto p-6 bg-gray-100 min-h-screen">
@@ -39,19 +50,19 @@ const MyReports = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {reports.slice(0, 9).map((report) => (
                         <div
-                            key={report.id}
+                            key={report._id}
                             className="p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition duration-300"
                         >
                             <h2 className="text-xl font-bold text-gray-800">
                                 {report.title.charAt(0).toUpperCase() + report.title.slice(1)}
                             </h2>
                             <p className="text-gray-600 mt-2">
-                                <span className="font-semibold">Report ID:</span> {report.id}
+                                <span className="font-semibold">Report ID:</span> {report._id}
                             </p>
                             <p className="text-gray-600 mt-2">
-                                {report.body.length > 100
-                                    ? report.body.slice(0, 100) + "..."
-                                    : report.body}
+                                {report.description.length > 100
+                                    ? report.description.slice(0, 100) + "..."
+                                    : report.description}
                             </p>
                             <button className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">
                                 View Details

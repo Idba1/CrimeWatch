@@ -1,7 +1,7 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
-const crypto = require('crypto'); // Required for generating tokens in password recovery
+const crypto = require('crypto'); // Required for generating tokens for password recovery
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
@@ -17,7 +17,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Use your MongoDB URI – ideally, store it in .env
+// Ideally, store your MongoDB URI in .env
 const uri = `mongodb+srv://solosphere:iWVwKAPVokeFjwvl@cluster0.kfk05.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const client = new MongoClient(uri, {
@@ -31,6 +31,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         await client.connect();
+        // Note: We use the "user" collection (singular)
         const userCollection = client.db('solosphere').collection('user');
         const crimePostsCollection = client.db('solosphere').collection('crimePosts');
 
@@ -54,20 +55,32 @@ async function run() {
             }
         });
 
-        // GET /users – Retrieve user(s). If an email query parameter is provided, returns that user.
+        // GET /users – Retrieve user(s). If an email query parameter is provided, return that user.
+        // If the user is not found, create a default user document.
         app.get('/users', async (req, res) => {
+            const { email } = req.query;
             try {
-                const { email } = req.query;
                 if (email) {
-                    const user = await userCollection.findOne({ email });
-                    if (!user) return res.status(404).json({ message: "User not found" });
+                    let user = await userCollection.findOne({ email });
+                    if (!user) {
+                        // Create a default user document if not found
+                        const defaultUser = {
+                            email,
+                            displayName: "",
+                            photoURL: "",
+                            bio: "",
+                            contact: ""
+                        };
+                        const result = await userCollection.insertOne(defaultUser);
+                        user = { ...defaultUser, _id: result.insertedId };
+                    }
                     return res.status(200).json(user);
                 } else {
                     const users = await userCollection.find().toArray();
-                    res.status(200).json(users);
+                    return res.status(200).json(users);
                 }
             } catch (err) {
-                res.status(500).json({ message: 'Error fetching users', error: err.message });
+                return res.status(500).json({ message: "Error fetching users", error: err.message });
             }
         });
 
@@ -178,7 +191,7 @@ async function run() {
         // CRIME POSTS ENDPOINTS
         // ──────────────────────────────
 
-        // POST /crimePosts – Create a new crime post (now requires userEmail)
+        // POST /crimePosts – Create a new crime post (requires userEmail)
         app.post('/crimePosts', async (req, res) => {
             try {
                 const { title, description, division, district, images, video, crimeTime, userEmail } = req.body;
@@ -192,7 +205,7 @@ async function run() {
                     description,
                     division,
                     district,
-                    images,
+                    images, // Expected to be an array of image URLs
                     video: video || null,
                     postTime,
                     crimeTime: new Date(crimeTime),
@@ -209,7 +222,7 @@ async function run() {
             }
         });
 
-        // GET /crimePosts – Get crime posts with optional query parameters for filtering, search, and pagination
+        // GET /crimePosts – Retrieve crime posts with filtering, search, and pagination
         app.get('/crimePosts', async (req, res) => {
             const { userEmail, search, district, page = 1, limit = 8 } = req.query;
             const query = {};
