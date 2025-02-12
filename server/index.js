@@ -37,6 +37,8 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const userCollection = client.db('solosphere').collection('user');
+        // Create/use the "crimePosts" collection in your database
+        const crimePostsCollection = client.db('solosphere').collection('crimePosts');
 
         app.post('/users', async (req, res) => {
             try {
@@ -187,6 +189,108 @@ async function run() {
         }
 
         testEmail();
+
+
+        // ── CREATE: Add a new crime post 
+        app.post('/crimePosts', async (req, res) => {
+            try {
+                const { title, description, division, district, images, video, crimeTime } = req.body;
+                // Validate required fields
+                if (!title || !description || !division || !district || !images || !crimeTime) {
+                    return res.status(400).json({ message: "Missing required fields" });
+                }
+
+                // Set the post time to now (server-side) and convert crimeTime to a Date
+                const postTime = new Date();
+                const newCrimePost = {
+                    title,
+                    description,
+                    division,
+                    district,
+                    images,
+                    video: video || null,
+                    postTime,
+                    crimeTime: new Date(crimeTime),
+                };
+
+                const result = await crimePostsCollection.insertOne(newCrimePost);
+                res.status(201).json({
+                    message: "Crime post created successfully",
+                    crimePost: { _id: result.insertedId, ...newCrimePost },
+                });
+            } catch (error) {
+                console.error("Error creating crime post:", error);
+                res.status(500).json({ message: "Error creating crime post", error: error.message });
+            }
+        });
+
+        // ── READ: Get all crime posts 
+        app.get('/crimePosts', async (req, res) => {
+            try {
+                const posts = await crimePostsCollection.find().toArray();
+                res.status(200).json(posts);
+            } catch (error) {
+                res.status(500).json({ message: "Error fetching crime posts", error: error.message });
+            }
+        });
+
+        // ── READ: Get a single crime post by ID 
+        app.get('/crimePosts/:id', async (req, res) => {
+            try {
+                const { id } = req.params;
+                const post = await crimePostsCollection.findOne({ _id: new ObjectId(id) });
+                if (!post) {
+                    return res.status(404).json({ message: "Crime post not found" });
+                }
+                res.status(200).json(post);
+            } catch (error) {
+                res.status(500).json({ message: "Error fetching crime post", error: error.message });
+            }
+        });
+
+        // ── UPDATE: Update a crime post by ID 
+        app.put('/crimePosts/:id', async (req, res) => {
+            try {
+                const { id } = req.params;
+                const { title, description, division, district, images, video, crimeTime } = req.body;
+                const updatedPost = {
+                    title,
+                    description,
+                    division,
+                    district,
+                    images,
+                    video: video || null,
+                    crimeTime: new Date(crimeTime),
+                };
+
+                const result = await crimePostsCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: updatedPost }
+                );
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ message: "Crime post not found" });
+                }
+                res.status(200).json({ message: "Crime post updated successfully" });
+            } catch (error) {
+                console.error("Error updating crime post:", error);
+                res.status(500).json({ message: "Error updating crime post", error: error.message });
+            }
+        });
+
+        // ── DELETE: Delete a crime post by ID 
+        app.delete('/crimePosts/:id', async (req, res) => {
+            try {
+                const { id } = req.params;
+                const result = await crimePostsCollection.deleteOne({ _id: new ObjectId(id) });
+                if (result.deletedCount === 0) {
+                    return res.status(404).json({ message: "Crime post not found" });
+                }
+                res.status(200).json({ message: "Crime post deleted successfully" });
+            } catch (error) {
+                res.status(500).json({ message: "Error deleting crime post", error: error.message });
+            }
+        });
 
         // Ping the MongoDB server
         await client.db('admin').command({ ping: 1 });
