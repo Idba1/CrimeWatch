@@ -90,6 +90,24 @@ async function run() {
             }
         });
 
+        // PUT /users/:id – Update user profile (displayName, photoURL, bio, contact)
+        app.put('/users/:id', async (req, res) => {
+            const { id } = req.params;
+            const { displayName, photoURL, bio, contact } = req.body;
+            try {
+                const result = await usersCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: { displayName, photoURL, bio, contact } }
+                );
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+                return res.status(200).json({ message: 'Profile updated successfully' });
+            } catch (err) {
+                return res.status(500).json({ message: 'Error updating profile', error: err.message });
+            }
+        });
+
         // Delete user by ID
         app.delete('/users/:id', async (req, res) => {
             const { id } = req.params;
@@ -191,7 +209,7 @@ async function run() {
         testEmail();
 
 
-        // CREATE: Add a new crime post 
+        // ── CREATE: Add a new crime post 
         app.post('/crimePosts', async (req, res) => {
             try {
                 const { title, description, division, district, images, video, crimeTime } = req.body;
@@ -224,7 +242,34 @@ async function run() {
             }
         });
 
-        // READ: Get all crime posts 
+        // Supports query parameters: userEmail, search, district, page, limit
+        app.get('/crimePosts', async (req, res) => {
+            const { userEmail, search, district, page = 1, limit = 8 } = req.query;
+            const query = {};
+            if (userEmail) query.userEmail = userEmail;
+            if (search) {
+                query.$or = [
+                    { title: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } }
+                ];
+            }
+            if (district) query.district = district;
+
+            const pageNumber = parseInt(page);
+            const limitNumber = parseInt(limit);
+            try {
+                const totalPosts = await crimePostsCollection.countDocuments(query);
+                const posts = await crimePostsCollection.find(query)
+                    .skip((pageNumber - 1) * limitNumber)
+                    .limit(limitNumber)
+                    .toArray();
+                res.status(200).json({ posts, totalPosts, currentPage: pageNumber, totalPages: Math.ceil(totalPosts / limitNumber) });
+            } catch (err) {
+                return res.status(500).json({ message: 'Error fetching crime posts', error: err.message });
+            }
+        });
+
+        // ── READ: Get all crime posts 
         app.get('/crimePosts', async (req, res) => {
             try {
                 const posts = await crimePostsCollection.find().toArray();
@@ -234,7 +279,9 @@ async function run() {
             }
         });
 
-        // READ: Get a single crime post by ID 
+
+
+        // ── READ: Get a single crime post by ID 
         app.get('/crimePosts/:id', async (req, res) => {
             try {
                 const { id } = req.params;
@@ -248,7 +295,7 @@ async function run() {
             }
         });
 
-        // UPDATE: Update a crime post by ID 
+        // ── UPDATE: Update a crime post by ID 
         app.put('/crimePosts/:id', async (req, res) => {
             try {
                 const { id } = req.params;
