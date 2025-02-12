@@ -17,6 +17,7 @@ import ConditionalDashboard from "../Dashboard/ConditionalDashboard/ConditionalD
 import AdminDashboard from "../Dashboard/AdminDashboard/AdminDashboard";
 import Chatbot from "../Pages/Chatbot/Chatbot";
 import Contact from "../Pages/ContactPage/Contact";
+import PostCrime from "../Components/Crime2/PostCrime";
 
 const Routes = createBrowserRouter([
     {
@@ -106,6 +107,12 @@ const Routes = createBrowserRouter([
                     <PrivateRoute>
                         <ForgetPassword />
                     </PrivateRoute>
+                ),
+            },
+            {
+                path: '/post-crime',
+                element: (
+                        <PostCrime></PostCrime>
                 ),
             },
             {
