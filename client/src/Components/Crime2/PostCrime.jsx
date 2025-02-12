@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { AuthContext } from '../../Provider/AuthProvider';
 
 function PostCrime() {
+    const { user } = useContext(AuthContext);
     const [crimePosts, setCrimePosts] = useState([]);
     const [formData, setFormData] = useState({
         title: '',
@@ -20,12 +22,17 @@ function PostCrime() {
         fetchCrimePosts();
     }, []);
 
-    // Fetch all crime posts
+    // Fetch all crime posts and extract the posts array from the returned object
     const fetchCrimePosts = async () => {
         try {
             const response = await fetch(`${API_URL}/crimePosts`);
             const data = await response.json();
-            setCrimePosts(data);
+            // Check if data.posts exists, else assume data is an array
+            if (data.posts) {
+                setCrimePosts(data.posts);
+            } else {
+                setCrimePosts(data);
+            }
         } catch (error) {
             console.error('Error fetching crime posts:', error);
         }
@@ -40,14 +47,16 @@ function PostCrime() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Add user email to the payload if available
         const payload = {
             title: formData.title,
             description: formData.description,
             division: formData.division,
             district: formData.district,
-            images: formData.images.split(',').map(url => url.trim()),
+            images: formData.images.split(',').map((url) => url.trim()),
             video: formData.video || null,
             crimeTime: formData.crimeTime,
+            userEmail: user?.email, // ensure the user email is included
         };
 
         try {
@@ -55,9 +64,7 @@ function PostCrime() {
                 // Update existing post
                 const response = await fetch(`${API_URL}/crimePosts/${editingId}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
                 });
                 if (response.ok) {
@@ -82,7 +89,7 @@ function PostCrime() {
         }
     };
 
-    // Reset the form to initial state
+    // Reset the form to its initial state
     const resetForm = () => {
         setFormData({
             title: '',
@@ -128,11 +135,19 @@ function PostCrime() {
             <h1 className="text-3xl font-bold mb-6 text-center">Crime Posts</h1>
 
             {/* Form for creating/updating a crime post */}
-            <form onSubmit={handleSubmit} className="max-w-xl mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-6">
-                <h2 className="text-2xl mb-4">{editingId ? 'Edit Crime Post' : 'Add Crime Post'}</h2>
+            <form
+                onSubmit={handleSubmit}
+                className="max-w-xl mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-6"
+            >
+                <h2 className="text-2xl mb-4">
+                    {editingId ? 'Edit Crime Post' : 'Add Crime Post'}
+                </h2>
 
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
+                    <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="title"
+                    >
                         Title
                     </label>
                     <input
@@ -146,7 +161,10 @@ function PostCrime() {
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+                    <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="description"
+                    >
                         Description
                     </label>
                     <textarea
@@ -160,7 +178,10 @@ function PostCrime() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="division">
+                        <label
+                            className="block text-gray-700 text-sm font-bold mb-2"
+                            htmlFor="division"
+                        >
                             Division
                         </label>
                         <input
@@ -173,7 +194,10 @@ function PostCrime() {
                         />
                     </div>
                     <div>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="district">
+                        <label
+                            className="block text-gray-700 text-sm font-bold mb-2"
+                            htmlFor="district"
+                        >
                             District
                         </label>
                         <input
@@ -188,7 +212,10 @@ function PostCrime() {
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="images">
+                    <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="images"
+                    >
                         Images (comma separated URLs)
                     </label>
                     <input
@@ -202,7 +229,10 @@ function PostCrime() {
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="video">
+                    <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="video"
+                    >
                         Video URL (optional)
                     </label>
                     <input
@@ -215,7 +245,10 @@ function PostCrime() {
                 </div>
 
                 <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="crimeTime">
+                    <label
+                        className="block text-gray-700 text-sm font-bold mb-2"
+                        htmlFor="crimeTime"
+                    >
                         Crime Time
                     </label>
                     <input
@@ -238,7 +271,10 @@ function PostCrime() {
                     {editingId && (
                         <button
                             type="button"
-                            onClick={() => { setEditingId(null); resetForm(); }}
+                            onClick={() => {
+                                setEditingId(null);
+                                resetForm();
+                            }}
                             className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                         >
                             Cancel
@@ -247,16 +283,20 @@ function PostCrime() {
                 </div>
             </form>
 
-            {/* List of crime posts */}
+            {/* List of crime posts rendered as cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {crimePosts.map(post => (
+                {crimePosts.map((post) => (
                     <div key={post._id} className="bg-white shadow-md rounded px-8 pt-6 pb-8">
                         <h3 className="text-xl font-bold mb-2">{post.title}</h3>
                         <p className="text-gray-700 mb-2">{post.description}</p>
                         <p className="text-gray-600 mb-2"><strong>Division:</strong> {post.division}</p>
                         <p className="text-gray-600 mb-2"><strong>District:</strong> {post.district}</p>
-                        <p className="text-gray-600 mb-2"><strong>Post Time:</strong> {new Date(post.postTime).toLocaleString()}</p>
-                        <p className="text-gray-600 mb-2"><strong>Crime Time:</strong> {new Date(post.crimeTime).toLocaleString()}</p>
+                        <p className="text-gray-600 mb-2">
+                            <strong>Post Time:</strong> {new Date(post.postTime).toLocaleString()}
+                        </p>
+                        <p className="text-gray-600 mb-2">
+                            <strong>Crime Time:</strong> {new Date(post.crimeTime).toLocaleString()}
+                        </p>
 
                         <div className="mb-2">
                             <strong>Images:</strong>

@@ -105,9 +105,9 @@ const Profile = () => {
                     >
                         Edit Profile
                     </button>
-                    <Link className="mt-6 p-2 lg:px-5 bg-blue-500 text-white  py-2 rounded-lg shadow-md hover:bg-blue-600 w-full lg:w-1/2" to={'//post-crime'}>
+                    {/* <Link className="mt-6 p-2 lg:px-5 bg-blue-500 text-white  py-2 rounded-lg shadow-md hover:bg-blue-600 w-full lg:w-1/2" to={'http://localhost:5173/post-crime'}>
                         Post A Crime
-                    </Link>
+                    </Link> */}
                 </div>
             </div>
 
