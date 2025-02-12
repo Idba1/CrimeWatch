@@ -12,8 +12,8 @@ const AdminDashboard = () => {
                 {/* Stats Cards Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <StatsCard
-                        title="Today's Money"
-                        value="$53k"
+                        title="Today's Crime"
+                        value="3k"
                         change="+55% from last week"
                         color="blue"
                     />
@@ -24,13 +24,13 @@ const AdminDashboard = () => {
                         color="green"
                     />
                     <StatsCard
-                        title="New Clients"
+                        title="New Visitors"
                         value="3,462"
                         change="-2% than yesterday"
                         color="red"
                     />
                     <StatsCard
-                        title="Sales"
+                        title="News"
                         value="$103,430"
                         change="+5% than yesterday"
                         color="orange"
@@ -39,8 +39,8 @@ const AdminDashboard = () => {
                 {/* Charts Section */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <AdminChart title="Website View" />
-                    <AdminChart title="Daily Sales" />
-                    <AdminChart title="Completed Tasks" />
+                    <AdminChart title="Daily News" />
+                    <AdminChart title="Viewers Feedback" />
                 </div>
             </div>
         </div>

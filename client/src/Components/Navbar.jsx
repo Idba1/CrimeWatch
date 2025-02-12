@@ -89,10 +89,10 @@ const Navbar = () => {
                     About
                 </Link>
                 <Link
-                    to="/leaderboard"
+                    to="/post-crime"
                     className="text-[#F3F4F6] hover:text-[#FF8C00] hover:scale-105 hover:font-bold transition-all duration-300"
                 >
-                    Leaderboard
+                    Post Crime
                 </Link>
                 <Link
                     to="/chat-bot"

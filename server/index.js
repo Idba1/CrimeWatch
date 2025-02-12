@@ -1,8 +1,7 @@
-// server.js
 const express = require("express");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
-const crypto = require("crypto"); // For generating tokens for password recovery
+const crypto = require("crypto");
 require("dotenv").config();
 const nodemailer = require("nodemailer");
 
