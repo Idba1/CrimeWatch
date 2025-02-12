@@ -248,6 +248,35 @@ async function run() {
             }
         });
 
+        // UPDATE: Update a crime post by ID 
+        app.put('/crimePosts/:id', async (req, res) => {
+            try {
+                const { id } = req.params;
+                const { title, description, division, district, images, video, crimeTime } = req.body;
+                const updatedPost = {
+                    title,
+                    description,
+                    division,
+                    district,
+                    images,
+                    video: video || null,
+                    crimeTime: new Date(crimeTime),
+                };
+
+                const result = await crimePostsCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $set: updatedPost }
+                );
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ message: "Crime post not found" });
+                }
+                res.status(200).json({ message: "Crime post updated successfully" });
+            } catch (error) {
+                console.error("Error updating crime post:", error);
+                res.status(500).json({ message: "Error updating crime post", error: error.message });
+            }
+        });
 
  
 
