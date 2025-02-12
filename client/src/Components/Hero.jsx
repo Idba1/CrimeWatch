@@ -16,7 +16,7 @@ const Hero = () => {
                         </div>
                     </div>
                     <div className="flex items-center justify-center p-6 mt-8 lg:mt-0 h-72 sm:h-80 lg:h-96 xl:h-112 2xl:h-128">
-                        <img src="https://i.ibb.co.com/1rQ7SkN/pexels-photo-1674752.webp" alt="" className="object-contain h-72 sm:h-80 lg:h-96 xl:h-112 2xl:h-128" />
+                        <img src="https://i.ibb.co.com/w361Hth/86236a01-ec51-4749-b79f-3a0b37c07715.jpg" alt="" className="object-contain h-72 sm:h-80 lg:h-96 xl:h-112 2xl:h-128" />
                     </div>
                 </div>
             </section>
