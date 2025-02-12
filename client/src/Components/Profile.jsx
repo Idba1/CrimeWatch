@@ -98,14 +98,14 @@ const Profile = () => {
                     {userData.bio && <p className="text-gray-700 mb-2">{userData.bio}</p>}
                     {userData.contact && <p className="text-gray-600 text-sm">{userData.contact}</p>}
                 </div>
-                <div className='flex w-1/2 justify-center items-center mx-auto gap-4'>
+                <div className='flex flex-col lg:flex-row w-1/2 justify-center items-center mx-auto gap-4'>
                     <button
-                        className="mt-6 px-5 bg-blue-500 text-white  py-2 rounded-lg shadow-md hover:bg-blue-600 w-1/2"
+                        className="mt-6 p-2 lg:px-5 bg-blue-500 text-white  py-2 rounded-lg shadow-md hover:bg-blue-600 w-full lg:w-1/2"
                         onClick={() => setShowEdit(true)}
                     >
                         Edit Profile
                     </button>
-                    <Link className="mt-6 px-5 bg-blue-500 text-white  py-2 rounded-lg shadow-md hover:bg-blue-600 w-1/2" to={'//post-crime'}>
+                    <Link className="mt-6 p-2 lg:px-5 bg-blue-500 text-white  py-2 rounded-lg shadow-md hover:bg-blue-600 w-full lg:w-1/2" to={'//post-crime'}>
                         Post A Crime
                     </Link>
                 </div>
