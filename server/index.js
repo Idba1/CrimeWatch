@@ -234,6 +234,23 @@ async function run() {
             }
         });
 
+        // READ: Get a single crime post by ID 
+        app.get('/crimePosts/:id', async (req, res) => {
+            try {
+                const { id } = req.params;
+                const post = await crimePostsCollection.findOne({ _id: new ObjectId(id) });
+                if (!post) {
+                    return res.status(404).json({ message: "Crime post not found" });
+                }
+                res.status(200).json(post);
+            } catch (error) {
+                res.status(500).json({ message: "Error fetching crime post", error: error.message });
+            }
+        });
+
+
+ 
+
         // Ping the MongoDB server
         await client.db('admin').command({ ping: 1 });
         console.log('Pinged your deployment. You successfully connected to MongoDB!');
