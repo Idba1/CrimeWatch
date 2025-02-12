@@ -1,13 +1,40 @@
-import { useState, useContext } from "react";
+// Navbar.jsx
+import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../Provider/AuthProvider";
 import { Link } from "react-router-dom";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes, FaBell } from "react-icons/fa";
+import { io } from "socket.io-client";
+
+// Establish a connection to the Socket.IO server.
+// Adjust the URL if your server is hosted elsewhere.
+const socket = io("http://localhost:9000");
 
 const Navbar = () => {
     const { user, logOut } = useContext(AuthContext);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+    const toggleNotifications = () => setShowNotifications(!showNotifications);
+
+    // When the user logs in, register with the Socket.IO server using their email.
+    useEffect(() => {
+        if (user && user.email) {
+            socket.emit("register", user.email);
+        }
+    }, [user]);
+
+    // Listen for notifications from the server.
+    useEffect(() => {
+        socket.on("notification", (data) => {
+            setNotifications((prev) => [data, ...prev]);
+        });
+        // Cleanup listener on component unmount.
+        return () => {
+            socket.off("notification");
+        };
+    }, []);
 
     const isAdmin = user?.role === "admin";
     const isVerified = user?.isVerified;
@@ -19,7 +46,11 @@ const Navbar = () => {
                 to="/"
                 className="flex items-center gap-2 text-white hover:text-[#FF8C00] hover:scale-105 hover:font-bold transition-all duration-300"
             >
-                <img className="h-16 w-auto" src="https://i.ibb.co.com/Y9FjdL6/Crime-Watch.png" alt="Logo" />
+                <img
+                    className="h-16 w-auto"
+                    src="https://i.ibb.co/Y9FjdL6/Crime-Watch.png"
+                    alt="Logo"
+                />
                 <span className="font-bold text-[#FF8C00] text-xl">CrimeWatch</span>
             </Link>
 
@@ -77,6 +108,36 @@ const Navbar = () => {
                         Admin Panel
                     </Link>
                 )}
+
+                {/* Notification Bell */}
+                <div className="relative">
+                    <button onClick={toggleNotifications} className="relative focus:outline-none">
+                        <FaBell className="text-2xl text-white hover:text-[#FF8C00] transition-all duration-300" />
+                        {notifications.length > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                                {notifications.length}
+                            </span>
+                        )}
+                    </button>
+                    {showNotifications && (
+                        <div className="absolute right-0 mt-2 w-64 bg-white text-black rounded shadow-lg z-10">
+                            <ul className="max-h-64 overflow-y-auto">
+                                {notifications.length > 0 ? (
+                                    notifications.map((notif, index) => (
+                                        <li
+                                            key={index}
+                                            className="px-4 py-2 border-b last:border-0 hover:bg-gray-100"
+                                        >
+                                            {notif.message}
+                                        </li>
+                                    ))
+                                ) : (
+                                    <li className="px-4 py-2">No new notifications</li>
+                                )}
+                            </ul>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Mobile Menu Toggle */}
@@ -158,7 +219,7 @@ const Navbar = () => {
                 </div>
             )}
 
-            {/* Profile or Signup Section */}
+            {/* Profile / Signup Section */}
             <div className="hidden md:flex items-center gap-4">
                 {!user ? (
                     <Link
@@ -177,7 +238,7 @@ const Navbar = () => {
                                 title={user?.displayName}
                             />
                         </button>
-                        {/* Dropdown Menu */}
+                        {/* Profile Dropdown Menu */}
                         <ul className="absolute right-0 mt-2 p-2 shadow-lg bg-[#F3F4F6] text-black rounded-md w-48 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
                             <li>
                                 <Link
