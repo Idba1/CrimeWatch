@@ -1,15 +1,16 @@
-const express = require('express');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const cors = require('cors');
-const crypto = require('crypto'); // Required for generating tokens for password recovery
-require('dotenv').config();
-const nodemailer = require('nodemailer');
+// server.js
+const express = require("express");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const cors = require("cors");
+const crypto = require("crypto"); // For generating tokens for password recovery
+require("dotenv").config();
+const nodemailer = require("nodemailer");
 
 const app = express();
 const port = process.env.PORT || 9000;
 
 const corsOptions = {
-    origin: ['http://localhost:5173', 'http://localhost:5174'],
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
     optionSuccessStatus: 200,
 };
@@ -18,7 +19,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Ideally, store your MongoDB URI in .env
-const uri = `mongodb+srv://solosphere:iWVwKAPVokeFjwvl@cluster0.kfk05.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri =
+    process.env.MONGO_URI ||
+    `mongodb+srv://solosphere:iWVwKAPVokeFjwvl@cluster0.kfk05.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -31,16 +34,16 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         await client.connect();
-        // Note: We use the "user" collection (singular)
-        const userCollection = client.db('solosphere').collection('user');
-        const crimePostsCollection = client.db('solosphere').collection('crimePosts');
+        // Collections
+        const userCollection = client.db("solosphere").collection("user");
+        const crimePostsCollection = client.db("solosphere").collection("crimePosts");
 
         // ──────────────────────────────
         // USER ENDPOINTS
         // ──────────────────────────────
 
         // POST /users – Create a new user
-        app.post('/users', async (req, res) => {
+        app.post("/users", async (req, res) => {
             try {
                 const { email, pass, name, photo } = req.body;
                 if (!email || !pass || !name || !photo) {
@@ -57,7 +60,7 @@ async function run() {
 
         // GET /users – Retrieve user(s). If an email query parameter is provided, return that user.
         // If the user is not found, create a default user document.
-        app.get('/users', async (req, res) => {
+        app.get("/users", async (req, res) => {
             const { email } = req.query;
             try {
                 if (email) {
@@ -69,7 +72,7 @@ async function run() {
                             displayName: "",
                             photoURL: "",
                             bio: "",
-                            contact: ""
+                            contact: "",
                         };
                         const result = await userCollection.insertOne(defaultUser);
                         user = { ...defaultUser, _id: result.insertedId };
@@ -85,7 +88,7 @@ async function run() {
         });
 
         // PUT /users/:id – Update user profile (displayName, photoURL, bio, contact)
-        app.put('/users/:id', async (req, res) => {
+        app.put("/users/:id", async (req, res) => {
             const { id } = req.params;
             const { displayName, photoURL, bio, contact } = req.body;
             try {
@@ -94,25 +97,25 @@ async function run() {
                     { $set: { displayName, photoURL, bio, contact } }
                 );
                 if (result.matchedCount === 0) {
-                    return res.status(404).json({ message: 'User not found' });
+                    return res.status(404).json({ message: "User not found" });
                 }
-                return res.status(200).json({ message: 'Profile updated successfully' });
+                return res.status(200).json({ message: "Profile updated successfully" });
             } catch (err) {
-                return res.status(500).json({ message: 'Error updating profile', error: err.message });
+                return res.status(500).json({ message: "Error updating profile", error: err.message });
             }
         });
 
         // DELETE /users/:id – Delete a user
-        app.delete('/users/:id', async (req, res) => {
+        app.delete("/users/:id", async (req, res) => {
             const { id } = req.params;
             try {
                 const deletedUser = await userCollection.deleteOne({ _id: new ObjectId(id) });
                 if (deletedUser.deletedCount === 0) {
-                    return res.status(404).json({ message: 'User not found' });
+                    return res.status(404).json({ message: "User not found" });
                 }
-                res.status(200).json({ success: true, message: 'User deleted' });
+                res.status(200).json({ success: true, message: "User deleted" });
             } catch (err) {
-                res.status(500).json({ message: 'Error deleting user', error: err.message });
+                res.status(500).json({ message: "Error deleting user", error: err.message });
             }
         });
 
@@ -122,27 +125,27 @@ async function run() {
 
         async function sendPasswordRecoveryEmail(email, resetLink) {
             const transporter = nodemailer.createTransport({
-                service: 'Gmail',
+                service: "Gmail",
                 auth: {
-                    user: "crimewatch596@gmail.com",
-                    pass: "crimewatch09+?",
+                    user: process.env.EMAIL_USER || "crimewatch596@gmail.com",
+                    pass: process.env.EMAIL_PASS || "crimewatch09+?",
                 },
             });
             const mailOptions = {
-                from: "crimewatch596@gmail.com",
+                from: process.env.EMAIL_USER || "crimewatch596@gmail.com",
                 to: email,
-                subject: 'Password Recovery',
+                subject: "Password Recovery",
                 html: `<p>Please click the following link to reset your password:</p><a href="${resetLink}">${resetLink}</a>`,
             };
             try {
                 await transporter.sendMail(mailOptions);
-                console.log('Password recovery email sent successfully to', email);
+                console.log("Password recovery email sent successfully to", email);
             } catch (error) {
-                console.error('Error sending password recovery email:', error);
+                console.error("Error sending password recovery email:", error);
             }
         }
 
-        app.post('/request-password-recovery', async (req, res) => {
+        app.post("/request-password-recovery", async (req, res) => {
             const { email } = req.body;
             if (!email) {
                 return res.status(400).json({ message: "Email is required" });
@@ -152,7 +155,7 @@ async function run() {
                 if (!user) {
                     return res.status(404).json({ message: "User not found" });
                 }
-                const token = crypto.randomBytes(32).toString('hex');
+                const token = crypto.randomBytes(32).toString("hex");
                 const expireTime = new Date(Date.now() + 3600000); // Token expires in 1 hour
                 await userCollection.updateOne({ email }, { $set: { resetToken: token, resetTokenExpire: expireTime } });
                 const resetLink = `http://localhost:3000/reset-password?token=${token}&email=${email}`;
@@ -164,25 +167,26 @@ async function run() {
             }
         });
 
+        // Optional: Test Email function
         async function testEmail() {
             const transporter = nodemailer.createTransport({
-                service: 'Gmail',
+                service: "Gmail",
                 auth: {
-                    user: "crimewatch596@gmail.com",
-                    pass: "crimewatch09+?",
+                    user: process.env.EMAIL_USER || "crimewatch596@gmail.com",
+                    pass: process.env.EMAIL_PASS || "crimewatch09+?",
                 },
             });
             const mailOptions = {
-                from: "crimewatch596@gmail.com",
+                from: process.env.EMAIL_USER || "crimewatch596@gmail.com",
                 to: "moniraislam181@gmail.com",
-                subject: 'Test Email',
+                subject: "Test Email",
                 html: `<p>This is a test email.</p>`,
             };
             try {
                 await transporter.sendMail(mailOptions);
-                console.log('Test email sent successfully');
+                console.log("Test email sent successfully");
             } catch (error) {
-                console.error('Error sending test email:', error);
+                console.error("Error sending test email:", error);
             }
         }
         testEmail();
@@ -192,10 +196,9 @@ async function run() {
         // ──────────────────────────────
 
         // POST /crimePosts – Create a new crime post (requires userEmail)
-        app.post('/crimePosts', async (req, res) => {
+        app.post("/crimePosts", async (req, res) => {
             try {
                 const { title, description, division, district, images, video, crimeTime, userEmail } = req.body;
-                // Validate required fields including userEmail
                 if (!title || !description || !division || !district || !images || !crimeTime || !userEmail) {
                     return res.status(400).json({ message: "Missing required fields" });
                 }
@@ -210,6 +213,10 @@ async function run() {
                     postTime,
                     crimeTime: new Date(crimeTime),
                     userEmail,
+                    upvotes: 0,
+                    downvotes: 0,
+                    score: 0,
+                    comments: [],
                 };
                 const result = await crimePostsCollection.insertOne(newCrimePost);
                 res.status(201).json({
@@ -223,14 +230,14 @@ async function run() {
         });
 
         // GET /crimePosts – Retrieve crime posts with filtering, search, and pagination
-        app.get('/crimePosts', async (req, res) => {
+        app.get("/crimePosts", async (req, res) => {
             const { userEmail, search, district, page = 1, limit = 8 } = req.query;
             const query = {};
             if (userEmail) query.userEmail = userEmail;
             if (search) {
                 query.$or = [
-                    { title: { $regex: search, $options: 'i' } },
-                    { description: { $regex: search, $options: 'i' } }
+                    { title: { $regex: search, $options: "i" } },
+                    { description: { $regex: search, $options: "i" } },
                 ];
             }
             if (district) query.district = district;
@@ -238,18 +245,24 @@ async function run() {
             const limitNumber = parseInt(limit);
             try {
                 const totalPosts = await crimePostsCollection.countDocuments(query);
-                const posts = await crimePostsCollection.find(query)
+                const posts = await crimePostsCollection
+                    .find(query)
                     .skip((pageNumber - 1) * limitNumber)
                     .limit(limitNumber)
                     .toArray();
-                res.status(200).json({ posts, totalPosts, currentPage: pageNumber, totalPages: Math.ceil(totalPosts / limitNumber) });
+                res.status(200).json({
+                    posts,
+                    totalPosts,
+                    currentPage: pageNumber,
+                    totalPages: Math.ceil(totalPosts / limitNumber),
+                });
             } catch (err) {
-                return res.status(500).json({ message: 'Error fetching crime posts', error: err.message });
+                return res.status(500).json({ message: "Error fetching crime posts", error: err.message });
             }
         });
 
         // GET /crimePosts/:id – Get a single crime post by ID
-        app.get('/crimePosts/:id', async (req, res) => {
+        app.get("/crimePosts/:id", async (req, res) => {
             try {
                 const { id } = req.params;
                 const post = await crimePostsCollection.findOne({ _id: new ObjectId(id) });
@@ -263,7 +276,7 @@ async function run() {
         });
 
         // PUT /crimePosts/:id – Update a crime post by ID
-        app.put('/crimePosts/:id', async (req, res) => {
+        app.put("/crimePosts/:id", async (req, res) => {
             try {
                 const { id } = req.params;
                 const { title, description, division, district, images, video, crimeTime } = req.body;
@@ -291,7 +304,7 @@ async function run() {
         });
 
         // DELETE /crimePosts/:id – Delete a crime post by ID
-        app.delete('/crimePosts/:id', async (req, res) => {
+        app.delete("/crimePosts/:id", async (req, res) => {
             try {
                 const { id } = req.params;
                 const result = await crimePostsCollection.deleteOne({ _id: new ObjectId(id) });
@@ -304,9 +317,68 @@ async function run() {
             }
         });
 
+        // ──────────────────────────────
+        // COMMUNITY INTERACTION ENDPOINTS
+        // ──────────────────────────────
+
+        // POST /crimePosts/:id/vote – Upvote or Downvote a crime post
+        app.post("/crimePosts/:id/vote", async (req, res) => {
+            const { id } = req.params;
+            const { vote } = req.body; // Expected values: "upvote" or "downvote"
+            if (!vote || (vote !== "upvote" && vote !== "downvote")) {
+                return res.status(400).json({ message: "Invalid vote type. Must be 'upvote' or 'downvote'." });
+            }
+            const update =
+                vote === "upvote"
+                    ? { $inc: { upvotes: 1, score: 1 } }
+                    : { $inc: { downvotes: 1, score: -1 } };
+            try {
+                const result = await crimePostsCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    update
+                );
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ message: "Crime post not found" });
+                }
+                res.status(200).json({ message: `Crime post ${vote}d successfully.` });
+            } catch (error) {
+                res.status(500).json({ message: "Error updating vote", error: error.message });
+            }
+        });
+
+        // POST /crimePosts/:id/comments – Add a comment with proof to a crime post
+        app.post("/crimePosts/:id/comments", async (req, res) => {
+            const { id } = req.params;
+            const { comment, userEmail, attachment } = req.body;
+            if (!comment || !userEmail || !attachment) {
+                return res.status(400).json({
+                    message: "Comment, userEmail, and a proof attachment (image/video URL) are required.",
+                });
+            }
+            const newComment = {
+                comment,
+                userEmail,
+                attachment,
+                timestamp: new Date(),
+                verified: true, // Mark comment as verified due to provided proof
+            };
+            try {
+                const result = await crimePostsCollection.updateOne(
+                    { _id: new ObjectId(id) },
+                    { $push: { comments: newComment }, $inc: { score: 1 } }
+                );
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ message: "Crime post not found" });
+                }
+                res.status(200).json({ message: "Comment added successfully", comment: newComment });
+            } catch (error) {
+                res.status(500).json({ message: "Error adding comment", error: error.message });
+            }
+        });
+
         // Test connection to MongoDB
-        await client.db('admin').command({ ping: 1 });
-        console.log('Pinged your deployment. You successfully connected to MongoDB!');
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Optionally close the client when needed (for graceful shutdown)
     }
@@ -315,8 +387,8 @@ async function run() {
 run().catch(console.dir);
 
 // Root endpoint
-app.get('/', (req, res) => {
-    res.send('Hello from crimeWatch server!');
+app.get("/", (req, res) => {
+    res.send("Hello from crimeWatch server!");
 });
 
 // Start the server
