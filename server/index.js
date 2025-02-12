@@ -278,7 +278,19 @@ async function run() {
             }
         });
 
- 
+        // ── DELETE: Delete a crime post by ID 
+        app.delete('/crimePosts/:id', async (req, res) => {
+            try {
+                const { id } = req.params;
+                const result = await crimePostsCollection.deleteOne({ _id: new ObjectId(id) });
+                if (result.deletedCount === 0) {
+                    return res.status(404).json({ message: "Crime post not found" });
+                }
+                res.status(200).json({ message: "Crime post deleted successfully" });
+            } catch (error) {
+                res.status(500).json({ message: "Error deleting crime post", error: error.message });
+            }
+        });
 
         // Ping the MongoDB server
         await client.db('admin').command({ ping: 1 });
