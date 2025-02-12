@@ -7,9 +7,9 @@ const Footer = () => {
                 <div className="lg:w-1/3 flex justify-center lg:justify-start">
                     <a href="#" className="flex items-center space-x-3">
                         <img
-                            src="./logo.jpg"
+                            src="https://i.ibb.co.com/Y9FjdL6/Crime-Watch.png"
                             alt="Logo"
-                            className="h-14 w-16 object-contain"
+                            className="h-20 w-20 object-contain"
                         />
                         <span className="text-2xl font-semibold text-[#FF8C00] transition-all duration-300 hover:scale-105">
                             CrimeWatch

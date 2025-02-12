@@ -19,7 +19,7 @@ const Navbar = () => {
                 to="/"
                 className="flex items-center gap-2 text-white hover:text-[#FF8C00] hover:scale-105 hover:font-bold transition-all duration-300"
             >
-                <img className="h-8 w-auto" src="./logo.jpg" alt="Logo" />
+                <img className="h-16 w-auto" src="https://i.ibb.co.com/Y9FjdL6/Crime-Watch.png" alt="Logo" />
                 <span className="font-bold text-xl">CrimeWatch</span>
             </Link>
 
