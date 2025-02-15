@@ -56,7 +56,7 @@ function PostCrime() {
             images: formData.images.split(',').map((url) => url.trim()),
             video: formData.video || null,
             crimeTime: formData.crimeTime,
-            userEmail: user?.email, // ensure the user email is included
+            userEmail: user?.email, 
         };
 
         try {

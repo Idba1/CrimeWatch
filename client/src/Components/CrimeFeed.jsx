@@ -18,7 +18,7 @@ const CrimeFeed = () => {
 
     // States for pagination
     const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(9);
+    const [limit, setLimit] = useState(6);
     const [totalPages, setTotalPages] = useState(1);
 
     // Fetch crime posts from the backend whenever filtering, sorting, searching, or pagination options change.
@@ -68,7 +68,7 @@ const CrimeFeed = () => {
                     value={search}
                     onChange={(e) => {
                         setSearch(e.target.value);
-                        setPage(1);
+                        setPage(1); // reset page on new search
                     }}
                     className="border rounded px-3 py-2 w-full md:w-1/3"
                 />
@@ -78,14 +78,16 @@ const CrimeFeed = () => {
                     value={filterDivision}
                     onChange={(e) => {
                         setFilterDivision(e.target.value);
-                        setPage(1);
+                        setPage(1); // reset page on filter change
                     }}
                     className="border rounded px-3 py-2 w-full md:w-1/4"
                 >
                     <option value="">All Divisions</option>
-                    <option value="Division 1">Division 1</option>
-                    <option value="Division 2">Division 2</option>
-                    {/* Add more divisions as needed */}
+                    <option value="Noakhali">Noakhali</option>
+                    <option value="Chittagong">Chittagong</option>
+                    <option value="Rajshahi">Rajshahi</option>
+                    <option value="Barishal">Barishal</option>
+                    <option value="Dhaka">Dhaka</option>
                 </select>
 
                 {/* District Filter */}
@@ -93,14 +95,16 @@ const CrimeFeed = () => {
                     value={filterDistrict}
                     onChange={(e) => {
                         setFilterDistrict(e.target.value);
-                        setPage(1);
+                        setPage(1); // reset page on filter change
                     }}
                     className="border rounded px-3 py-2 w-full md:w-1/4"
                 >
                     <option value="">All Districts</option>
-                    <option value="District 1">District 1</option>
-                    <option value="District 2">District 2</option>
-                    {/* Add more districts as needed */}
+                    <option value="Noakhali">Noakhali</option>
+                    <option value="Chittagong">Chittagong</option>
+                    <option value="Rajshahi">Rajshahi</option>
+                    <option value="Barishal">Barishal</option>
+                    <option value="Dhaka">Dhaka</option>
                 </select>
 
                 {/* Verification Score Filter */}
@@ -108,7 +112,7 @@ const CrimeFeed = () => {
                     value={filterVerification}
                     onChange={(e) => {
                         setFilterVerification(e.target.value);
-                        setPage(1);
+                        setPage(1); // reset page on filter change
                     }}
                     className="border rounded px-3 py-2 w-full md:w-1/4"
                 >
@@ -125,7 +129,7 @@ const CrimeFeed = () => {
                     value={sortBy}
                     onChange={(e) => {
                         setSortBy(e.target.value);
-                        setPage(1);
+                        setPage(1); // reset page on sorting change
                     }}
                     className="border rounded px-3 py-2 w-full md:w-1/4 mt-4 md:mt-0"
                 >
@@ -153,11 +157,15 @@ const CrimeFeed = () => {
                                     className="p-4 bg-white shadow-md rounded-lg hover:shadow-lg transition duration-300"
                                 >
                                     <h2 className="text-xl font-bold text-gray-800">
-                                        {crime.title || (crime.category && crime.category.replace("-", " ").toUpperCase())}
+                                        {crime.title ||
+                                            (crime.category &&
+                                                crime.category.replace("-", " ").toUpperCase())}
                                     </h2>
                                     <p className="text-gray-600 mt-2">
                                         <span className="font-semibold">Date:</span>{" "}
-                                        {crime.crimeTime ? new Date(crime.crimeTime).toLocaleDateString() : "Unknown"}
+                                        {crime.crimeTime
+                                            ? new Date(crime.crimeTime).toLocaleDateString()
+                                            : "Unknown"}
                                     </p>
                                     <p className="text-gray-600 mt-2">
                                         <span className="font-semibold">Location:</span>{" "}
@@ -178,7 +186,9 @@ const CrimeFeed = () => {
                                 </div>
                             ))
                         ) : (
-                            <p className="text-center text-gray-600 col-span-full">No crime posts found.</p>
+                            <p className="text-center text-gray-600 col-span-full">
+                                No crime posts found.
+                            </p>
                         )}
                     </div>
 
@@ -186,8 +196,8 @@ const CrimeFeed = () => {
                     {totalPages > 1 && (
                         <div className="flex justify-center items-center mt-6 space-x-4">
                             <button
-                                onClick={() => setPage(page > 1 ? page - 1 : 1)}
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+                                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-orange-500 disabled:opacity-50"
                                 disabled={page === 1}
                             >
                                 Prev
@@ -196,8 +206,10 @@ const CrimeFeed = () => {
                                 Page {page} of {totalPages}
                             </span>
                             <button
-                                onClick={() => setPage(page < totalPages ? page + 1 : page)}
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+                                onClick={() =>
+                                    setPage((prev) => (prev < totalPages ? prev + 1 : prev))
+                                }
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-orange-500 disabled:opacity-50"
                                 disabled={page === totalPages}
                             >
                                 Next

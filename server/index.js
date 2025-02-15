@@ -331,6 +331,8 @@ async function run() {
       }
     });
 
+    
+
     // GET /crimePosts/:id – Get a single crime post by ID
     app.get("/crimePosts/:id", async (req, res) => {
       try {
