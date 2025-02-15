@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../Provider/AuthProvider';
+import axios from 'axios';
 
 function PostCrime() {
     const { user } = useContext(AuthContext);
@@ -9,11 +10,14 @@ function PostCrime() {
         description: '',
         division: '',
         district: '',
-        images: '',
+        images: '', // will be set as comma-separated URLs after upload
         video: '',
         crimeTime: '',
     });
     const [editingId, setEditingId] = useState(null);
+    // For handling file input (multiple files)
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [uploading, setUploading] = useState(false);
 
     // Update the API_URL if your backend is hosted elsewhere
     const API_URL = 'http://localhost:9000';
@@ -43,11 +47,79 @@ function PostCrime() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    // Handle file selection from device
+    const handleFileChange = (e) => {
+        setSelectedFiles(e.target.files);
+    };
+
+    // Function to upload images to imgbb and return an array of image URLs
+    const uploadImages = async () => {
+        const imagebbApiKey = '1c267c56d05ce0b3bb6f46cbfad1d59b'; // Replace with your imgbb API key
+        const uploadedUrls = [];
+        // Loop through each selected file and upload it
+        for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i];
+            const data = new FormData();
+            data.append('image', file);
+            data.append('key', imagebbApiKey);
+            try {
+                const response = await axios.post('https://api.imgbb.com/1/upload', data);
+                if (response.data && response.data.data && response.data.data.url) {
+                    uploadedUrls.push(response.data.data.url);
+                }
+            } catch (error) {
+                console.error('Error uploading image to imgbb:', error);
+            }
+        }
+        return uploadedUrls;
+    };
+
+    // Function to call Gemini API to generate description from image URLs
+    const generateDescription = async (imageUrls) => {
+        try {
+            // Replace the URL below with the actual Gemini API endpoint.
+            // The request body is assumed to contain an array of image URLs.
+            const response = await axios.post(
+                'https://gemini-api.example.com/generate-description',
+                { imageUrls }
+            );
+            if (response.data && response.data.description) {
+                return response.data.description;
+            }
+        } catch (error) {
+            console.error('Error generating description from Gemini API:', error);
+        }
+        return '';
+    };
+
+    // Handler to upload images and generate description (only if no video provided)
+    const handleUploadAndGenerate = async () => {
+        if (selectedFiles.length === 0) {
+            alert('Please select image files from your device.');
+            return;
+        }
+        setUploading(true);
+        try {
+            // Upload images to imgbb
+            const urls = await uploadImages();
+            // Update formData.images as comma-separated URLs
+            setFormData((prev) => ({ ...prev, images: urls.join(', ') }));
+            // If no video and description is empty, generate description using Gemini API
+            if (!formData.video && (!formData.description || formData.description.trim() === '')) {
+                const generated = await generateDescription(urls);
+                setFormData((prev) => ({ ...prev, description: generated }));
+            }
+        } catch (error) {
+            console.error('Error during upload and description generation:', error);
+        }
+        setUploading(false);
+    };
+
     // Handle form submission for create or update
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Add user email to the payload if available
+        // Prepare payload with images as array (splitting by comma)
         const payload = {
             title: formData.title,
             description: formData.description,
@@ -56,7 +128,7 @@ function PostCrime() {
             images: formData.images.split(',').map((url) => url.trim()),
             video: formData.video || null,
             crimeTime: formData.crimeTime,
-            userEmail: user?.email, 
+            userEmail: user?.email,
         };
 
         try {
@@ -100,6 +172,7 @@ function PostCrime() {
             video: '',
             crimeTime: '',
         });
+        setSelectedFiles([]);
     };
 
     // Populate the form with data for editing
@@ -135,19 +208,11 @@ function PostCrime() {
             <h1 className="text-3xl font-bold mb-6 text-center">Crime Posts</h1>
 
             {/* Form for creating/updating a crime post */}
-            <form
-                onSubmit={handleSubmit}
-                className="max-w-xl mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-6"
-            >
-                <h2 className="text-2xl mb-4">
-                    {editingId ? 'Edit Crime Post' : 'Add Crime Post'}
-                </h2>
+            <form onSubmit={handleSubmit} className="max-w-xl mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-6">
+                <h2 className="text-2xl mb-4">{editingId ? 'Edit Crime Post' : 'Add Crime Post'}</h2>
 
                 <div className="mb-4">
-                    <label
-                        className="block text-gray-700 text-sm font-bold mb-2"
-                        htmlFor="title"
-                    >
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
                         Title
                     </label>
                     <input
@@ -161,10 +226,7 @@ function PostCrime() {
                 </div>
 
                 <div className="mb-4">
-                    <label
-                        className="block text-gray-700 text-sm font-bold mb-2"
-                        htmlFor="description"
-                    >
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
                         Description
                     </label>
                     <textarea
@@ -174,14 +236,15 @@ function PostCrime() {
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
                         required
                     ></textarea>
+                    <p className="text-xs text-gray-500 mt-1">
+                        For image posts, leave blank to auto-generate a description via Gemini API.
+                        For video posts, please enter a description manually.
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label
-                            className="block text-gray-700 text-sm font-bold mb-2"
-                            htmlFor="division"
-                        >
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="division">
                             Division
                         </label>
                         <input
@@ -194,10 +257,7 @@ function PostCrime() {
                         />
                     </div>
                     <div>
-                        <label
-                            className="block text-gray-700 text-sm font-bold mb-2"
-                            htmlFor="district"
-                        >
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="district">
                             District
                         </label>
                         <input
@@ -211,28 +271,16 @@ function PostCrime() {
                     </div>
                 </div>
 
+                {/* File input for selecting images */}
                 <div className="mb-4">
-                    <label
-                        className="block text-gray-700 text-sm font-bold mb-2"
-                        htmlFor="images"
-                    >
-                        Images (comma separated URLs)
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="file">
+                        Select Images
                     </label>
-                    <input
-                        type="text"
-                        name="images"
-                        value={formData.images}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-                        required
-                    />
+                    <input type="file" multiple onChange={handleFileChange} className="w-full" />
                 </div>
 
                 <div className="mb-4">
-                    <label
-                        className="block text-gray-700 text-sm font-bold mb-2"
-                        htmlFor="video"
-                    >
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="video">
                         Video URL (optional)
                     </label>
                     <input
@@ -245,10 +293,7 @@ function PostCrime() {
                 </div>
 
                 <div className="mb-4">
-                    <label
-                        className="block text-gray-700 text-sm font-bold mb-2"
-                        htmlFor="crimeTime"
-                    >
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="crimeTime">
                         Crime Time
                     </label>
                     <input
@@ -261,11 +306,20 @@ function PostCrime() {
                     />
                 </div>
 
-                <div className="flex items-center justify-between">
+                {/* Button to upload images and generate description if applicable */}
+                <div className="mb-4">
                     <button
-                        type="submit"
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        type="button"
+                        onClick={handleUploadAndGenerate}
+                        disabled={uploading}
+                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
                     >
+                        {uploading ? "Uploading & Generating..." : "Upload Images & Generate Description"}
+                    </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                    <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         {editingId ? 'Update Post' : 'Add Post'}
                     </button>
                     {editingId && (
@@ -320,16 +374,10 @@ function PostCrime() {
                         )}
 
                         <div className="flex space-x-4 mt-4">
-                            <button
-                                onClick={() => handleEdit(post)}
-                                className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 rounded"
-                            >
+                            <button onClick={() => handleEdit(post)} className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 rounded">
                                 Edit
                             </button>
-                            <button
-                                onClick={() => handleDelete(post._id)}
-                                className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
-                            >
+                            <button onClick={() => handleDelete(post._id)} className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded">
                                 Delete
                             </button>
                         </div>
