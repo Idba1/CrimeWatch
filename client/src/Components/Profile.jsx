@@ -38,7 +38,7 @@ const Profile = () => {
                     search,
                     district,
                     page,
-                    limit: 8
+                    limit: 6
                 }
             })
                 .then(res => {
