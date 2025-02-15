@@ -4,6 +4,7 @@ const cors = require("cors");
 const crypto = require("crypto");
 require("dotenv").config();
 const nodemailer = require("nodemailer");
+const axios = require("axios");
 
 // For real-time notifications using Socket.IO
 const http = require("http");
@@ -30,7 +31,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Ideally, store your MongoDB URI in .env
+// MongoDB URI (store in .env in production)
 const uri =
   process.env.MONGO_URI ||
   "mongodb+srv://solosphere:iWVwKAPVokeFjwvl@cluster0.kfk05.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
@@ -43,21 +44,19 @@ const client = new MongoClient(uri, {
   },
 });
 
-// A mapping for connected users (userEmail => socket.id)
+// Mapping for connected users (userEmail => socket.id)
 const connectedUsers = {};
 
 // Socket.IO connection handler
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
-  // Clients should emit 'register' with their userEmail to associate with their socket.
   socket.on("register", (userEmail) => {
     connectedUsers[userEmail] = socket.id;
     console.log(`User registered: ${userEmail} with socket id: ${socket.id}`);
   });
 
   socket.on("disconnect", () => {
-    // Remove disconnected sockets from connectedUsers mapping
     for (let email in connectedUsers) {
       if (connectedUsers[email] === socket.id) {
         delete connectedUsers[email];
@@ -68,6 +67,11 @@ io.on("connection", (socket) => {
   });
 });
 
+// Gemini API key and endpoint configuration
+const geminiApiKey = "AIzaSyD80pwJZo2KwHm11TkJ-lo5EVSO92EIAV8";
+// Replace with your actual Gemini API endpoint URL if different
+const geminiApiEndpoint = "https://gemini-api.example.com/generate-description";
+
 async function run() {
   try {
     await client.connect();
@@ -76,11 +80,9 @@ async function run() {
     const crimePostsCollection = client.db("solosphere").collection("crimePosts");
 
     // Helper function to send notifications based on user preferences.
-    // notificationData should include: { type, message, ... }
     async function sendNotification(userEmail, notificationData) {
       const userDoc = await userCollection.findOne({ email: userEmail });
       if (userDoc) {
-        // Default preferences: all notifications enabled.
         const preferences = userDoc.notificationPreferences || {
           new_comments: true,
           votes: true,
@@ -90,7 +92,6 @@ async function run() {
         if (notificationData.type === "vote" && !preferences.votes) return;
         if (notificationData.type === "admin_action" && !preferences.admin_actions) return;
       }
-      // If the user is connected, send the notification.
       if (connectedUsers[userEmail]) {
         io.to(connectedUsers[userEmail]).emit("notification", notificationData);
       }
@@ -100,7 +101,6 @@ async function run() {
     // USER ENDPOINTS
     // ──────────────────────────────
 
-    // POST /users – Create a new user
     app.post("/users", async (req, res) => {
       try {
         const { email, pass, name, photo } = req.body;
@@ -116,14 +116,12 @@ async function run() {
       }
     });
 
-    // GET /users – Retrieve user(s)
     app.get("/users", async (req, res) => {
       const { email } = req.query;
       try {
         if (email) {
           let user = await userCollection.findOne({ email });
           if (!user) {
-            // Create a default user document if not found
             const defaultUser = {
               email,
               displayName: "",
@@ -144,12 +142,10 @@ async function run() {
       }
     });
 
-    // PUT /users/:id – Update user profile
     app.put("/users/:id", async (req, res) => {
       const { id } = req.params;
       const { displayName, photoURL, bio, contact, notificationPreferences } = req.body;
       try {
-        // Optionally, update notificationPreferences if provided.
         const updateData = { displayName, photoURL, bio, contact };
         if (notificationPreferences) {
           updateData.notificationPreferences = notificationPreferences;
@@ -167,7 +163,6 @@ async function run() {
       }
     });
 
-    // DELETE /users/:id – Delete a user
     app.delete("/users/:id", async (req, res) => {
       const { id } = req.params;
       try {
@@ -261,16 +256,42 @@ async function run() {
     app.post("/crimePosts", async (req, res) => {
       try {
         const { title, description, division, district, images, video, crimeTime, userEmail } = req.body;
-        if (!title || !description || !division || !district || !images || !crimeTime || !userEmail) {
+        if (!title || !division || !district || !images || !crimeTime || !userEmail) {
           return res.status(400).json({ message: "Missing required fields" });
         }
-        const postTime = new Date();
+
+        // For video posts, description must be provided manually.
+        if (video && (!description || description.trim() === "")) {
+          return res.status(400).json({ message: "Please provide a description manually for video posts." });
+        }
+
+        // For image posts, if no description is provided, generate one using Gemini API.
+        let finalDescription = description;
+        if (!video && (!description || description.trim() === "")) {
+          // Ensure images is an array of URLs
+          const imageUrls = Array.isArray(images) ? images : images.split(',').map(url => url.trim());
+          try {
+            // Call Gemini API with your API key as a query parameter.
+            const geminiResponse = await axios.post(
+              `${geminiApiEndpoint}?key=${geminiApiKey}`,
+              { imageUrls }
+            );
+            if (geminiResponse.data && geminiResponse.data.description) {
+              finalDescription = geminiResponse.data.description;
+            }
+          } catch (err) {
+            console.error("Error generating description from Gemini API:", err);
+            finalDescription = "No description available.";
+          }
+        }
+
+        const postTime = new Date(); // Timestamp when the post is submitted
         const newCrimePost = {
           title,
-          description,
+          description: finalDescription,
           division,
           district,
-          images, // Expected to be an array of image URLs
+          images: Array.isArray(images) ? images : images.split(',').map(url => url.trim()),
           video: video || null,
           postTime,
           crimeTime: new Date(crimeTime),
@@ -280,6 +301,7 @@ async function run() {
           score: 0,
           comments: [],
         };
+
         const result = await crimePostsCollection.insertOne(newCrimePost);
 
         // Emit a notification to all connected users that a new crime post has been added.
@@ -301,7 +323,7 @@ async function run() {
 
     // GET /crimePosts – Retrieve crime posts with filtering, search, and pagination
     app.get("/crimePosts", async (req, res) => {
-      const { userEmail, search, district, page = 1, limit = 8 } = req.query;
+      const { userEmail, search, district, division, page = 1, limit = 8 } = req.query;
       const query = {};
       if (userEmail) query.userEmail = userEmail;
       if (search) {
@@ -311,6 +333,9 @@ async function run() {
         ];
       }
       if (district) query.district = district;
+      if (division) {
+        query.division = { $regex: division.trim(), $options: "i" };
+      }
       const pageNumber = parseInt(page);
       const limitNumber = parseInt(limit);
       try {
@@ -327,11 +352,10 @@ async function run() {
           totalPages: Math.ceil(totalPosts / limitNumber),
         });
       } catch (err) {
-        return res.status(500).json({ message: "Error fetching crime posts", error: err.message });
+        console.error("Error fetching crime posts:", err);
+        res.status(500).json({ message: "Error fetching crime posts", error: err.message });
       }
     });
-
-    
 
     // GET /crimePosts/:id – Get a single crime post by ID
     app.get("/crimePosts/:id", async (req, res) => {
@@ -357,7 +381,7 @@ async function run() {
           description,
           division,
           district,
-          images,
+          images: Array.isArray(images) ? images : images.split(',').map(url => url.trim()),
           video: video || null,
           crimeTime: new Date(crimeTime),
         };
@@ -383,7 +407,6 @@ async function run() {
         if (result.deletedCount === 0) {
           return res.status(404).json({ message: "Crime post not found" });
         }
-        // (Optional) Emit an admin action notification if needed.
         io.emit("notification", {
           type: "admin_action",
           message: `A crime post (ID: ${id}) has been removed by an admin.`,
@@ -419,11 +442,8 @@ async function run() {
         if (result.matchedCount === 0) {
           return res.status(404).json({ message: "Crime post not found" });
         }
-
-        // Retrieve the post to get the owner's email.
         const post = await crimePostsCollection.findOne({ _id: new ObjectId(id) });
         if (post) {
-          // Use the helper function to send a vote notification.
           await sendNotification(post.userEmail, {
             type: "vote",
             message: `Your post received a ${vote}.`,
@@ -431,7 +451,6 @@ async function run() {
             voteType: vote,
           });
         }
-
         res.status(200).json({ message: `Crime post ${vote}d successfully.` });
       } catch (error) {
         res.status(500).json({ message: "Error updating vote", error: error.message });
@@ -452,7 +471,7 @@ async function run() {
         userEmail,
         attachment,
         timestamp: new Date(),
-        verified: true, // Mark comment as verified due to provided proof
+        verified: true,
       };
       try {
         const result = await crimePostsCollection.updateOne(
@@ -462,11 +481,8 @@ async function run() {
         if (result.matchedCount === 0) {
           return res.status(404).json({ message: "Crime post not found" });
         }
-
-        // Retrieve the post to get the owner's email.
         const post = await crimePostsCollection.findOne({ _id: new ObjectId(id) });
         if (post) {
-          // Send a new comment notification using the helper function.
           await sendNotification(post.userEmail, {
             type: "new_comment",
             message: "Your post has a new comment.",
@@ -474,7 +490,6 @@ async function run() {
             comment: newComment,
           });
         }
-
         res.status(200).json({ message: "Comment added successfully", comment: newComment });
       } catch (error) {
         res.status(500).json({ message: "Error adding comment", error: error.message });
@@ -485,19 +500,16 @@ async function run() {
     // ADMIN ACTION ENDPOINT (Example: Ban a User)
     // ──────────────────────────────
 
-    // POST /admin/ban-user – Ban a user (for demonstration)
     app.post("/admin/ban-user", async (req, res) => {
       const { email } = req.body;
       if (!email) {
         return res.status(400).json({ message: "User email is required" });
       }
       try {
-        // For demonstration, update the user document with an isBanned flag.
         const result = await userCollection.updateOne({ email }, { $set: { isBanned: true } });
         if (result.modifiedCount === 0) {
           return res.status(404).json({ message: "User not found or already banned" });
         }
-        // Send an admin action notification to the banned user.
         await sendNotification(email, {
           type: "admin_action",
           message: "You have been banned by an admin.",
